@@ -1,1 +1,1 @@
-# A-mini-project-on-machine-learning
+# A mini project on machine learning
