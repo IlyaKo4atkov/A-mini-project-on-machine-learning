@@ -1,0 +1,33 @@
+import pandas as pd
+import numpy as np
+credits_df = pd.read_csv('./the_movies_dataset/credits.csv')
+credits_df.loc[1, 'cast']
+def convert_int(x):
+  try:
+    return int(x)
+  except:
+    return np.nan
+
+df['id'] = df['id'].apply(convert_int)
+
+#Для удаления записей, содержащих NaN, необходимо использовать метод drop
+df = df.drop(df[df['id'].isnull()].index)
+df['id'] = df['id'].astype('int')
+df_merge = df.merge(credits_df, on='id')
+
+#Мы используем библиотеку для преобразования строки в словарь
+import ast
+df_merge['cast'] = df_merge['cast'].apply(ast.literal_eval)
+def get_director(x):
+  for i in x:
+    if i['name'] != np.nan:
+      return i['name']
+    return np.nan
+df_merge['actor'] = df_merge['cast'].apply(get_director)
+df_merge['return'] = df_merge['revenue'] /  df['budget'] * 100 # Будем считать по классике в процентах, как велит финансовый менеджмент
+df_merge = df_merge[['actor', 'revenue', 'return', 'budget',	'runtime',	'vote_average',	'vote_count']]
+plt.title('Наиболее известные актеры, снимающиеся в самых кассовых фильмах')
+plt.xlabel('Имя актеров')
+plt.ylabel('Кассовые сборы, в долларах')
+df_merge.groupby('actor').sum().sort_values('revenue', ascending=False)['revenue'].head(10).plot(kind='bar')
+plt.show()
